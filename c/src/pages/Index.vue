@@ -4,35 +4,13 @@
       <div class="col col-md-3">
         <q-list link separator style="height: 100%">
           <q-list-header>Leads online</q-list-header>
-          <q-item>
+
+          <q-item v-for="contact in contacts" :key="contact.uuid">
             <q-item-side icon="contacts"/>
-            <q-item-main label="lead 1"/>
-            <q-item-side right icon="chat_bubble"/>
-          </q-item>
-          
-          <q-item>
-            <q-item-side icon="contacts"/>
-            <q-item-main label="lead 2"/>
+            <q-item-main :label="contact.uuid"/>
             <q-item-side right icon="chat_bubble"/>
           </q-item>
 
-          <q-item>
-            <q-item-side icon="contacts"/>
-            <q-item-main label="cliente 1"/>
-            <q-item-side right icon="chat_bubble"/>
-          </q-item>
-
-          <q-item>
-            <q-item-side icon="contacts"/>
-            <q-item-main label="cliente 2"/>
-            <q-item-side right icon="chat_bubble"/>
-          </q-item>
-
-          <q-item>
-            <q-item-side icon="contacts"/>
-            <q-item-main label="Usuário"/>
-            <q-item-side right icon="chat_bubble"/>
-          </q-item>
         </q-list>
       </div>
       <div class="col col-md-6">
@@ -75,28 +53,8 @@
       <div class="col col-md-3">
         <q-list link separator style="height: 100%">
           <q-list-header>Histórico de acesso</q-list-header>
-          <q-item>
-            <q-item-main label="Curso Iniciando com socket.io" sublabel="https://seusite.com/curso-iniciando-com-socketio"/>
-          </q-item>
-          
-          <q-item>
-            <q-item-main label="Curso Iniciando com socket.io" sublabel="https://seusite.com/curso-iniciando-com-socketio"/>
-          </q-item>
-
-          <q-item>
-            <q-item-main label="Curso Iniciando com socket.io" sublabel="https://seusite.com/curso-iniciando-com-socketio"/>
-          </q-item>
-
-          <q-item>
-            <q-item-main label="Curso Iniciando com socket.io" sublabel="https://seusite.com/curso-iniciando-com-socketio"/>
-          </q-item>
-
-          <q-item>
-            <q-item-main label="Curso Iniciando com socket.io" sublabel="https://seusite.com/curso-iniciando-com-socketio"/>
-          </q-item>
-
-          <q-item>
-            <q-item-main label="Curso Iniciando com socket.io" sublabel="https://seusite.com/curso-iniciando-com-socketio"/>
+          <q-item v-for="url in urls" :key="url">
+            <q-item-main label="Curso Iniciando com socket.io" :sublabel="url"/>
           </q-item>
         </q-list>
       </div>
@@ -112,8 +70,18 @@ export default {
   name: 'PageIndex',
   data() {
     return {
-      message: ''
+      message: '',
+      contacts: [],
+      urls: []
     }
+  },
+  mounted() {
+    this.$socket.on('contact-list', (data) => {
+      this.contacts = data;
+      this.urls = data[0].urls;
+    });
+
+    this.$socket.emit('connect-agent');
   }
 }
 </script>

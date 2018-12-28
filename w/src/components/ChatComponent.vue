@@ -48,7 +48,11 @@
 </template>
 
 <script>
+import Cookie from 'js-cookie';
+import socketio from 'socket.io-client';
 import chatIcon from './ChatLogo';
+
+const socket = socketio('localhost/chat');
 
 export default {
     components: {
@@ -58,6 +62,30 @@ export default {
         return {
             chatShow: false
         }
+    },
+    methods: {
+        uuidv4() {
+            return 'xxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+    },
+    mounted() {
+        let uuid = Cookie.get('attendanceuuid');
+        if (!uuid) {
+            uuid = this.uuidv4();
+            Cookie.set('attendanceuuid', uuid);
+        }
+
+        socket.emit('connect-contact', {
+            uuid: uuid,
+            url: window.location.href
+        });
+
+        socket.on('contact-list', (data) => {
+            console.log(data)
+        });
     }
 }
 </script>

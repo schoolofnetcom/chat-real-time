@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -11,5 +12,9 @@
   "license": "ISC",
   "dependencies": {
     "socket.io": "^2.2.0"
+  },
+  "devDependencies": {
+    "esm": "^3.0.84",
+    "nodemon": "^1.18.9"
   }
 }
