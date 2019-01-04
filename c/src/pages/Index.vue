@@ -46,6 +46,7 @@
               type="textarea"
               float-label="Digite a mensagem aqui..."
               :max-height="100"
+              @keydown="sendMessage"
             />
           </q-card-main>
         </q-card>
@@ -53,7 +54,7 @@
       <div class="col col-md-3">
         <q-list link separator style="height: 100%">
           <q-list-header>Histórico de acesso</q-list-header>
-          <q-item v-for="url in urls" :key="url">
+          <q-item v-for="(url, index) in urls" :key="index">
             <q-item-main label="Curso Iniciando com socket.io" :sublabel="url"/>
           </q-item>
         </q-list>
@@ -75,10 +76,32 @@ export default {
       urls: []
     }
   },
+  methods: {
+    sendMessage(e) {
+      if (e.code === 'Enter' || e.code === 'NumpadEnter') {
+        e.preventDefault();
+        
+        this.$socket.emit('agentSendMessage', {
+          message: 'teste',
+          contact: {
+            uuid: this.contacts[0].uuid
+          }
+        });
+      }
+    }
+  },
   mounted() {
     this.$socket.on('contact-list', (data) => {
       this.contacts = data;
-      this.urls = data[0].urls;
+      if (data.length > 0) {
+        this.urls = data[0].urls;
+      } else {
+        this.urls = [];
+      }
+    });
+
+    this.$socket.on('agentReceiveMessage', (data) => {
+      console.log(data);
     });
 
     this.$socket.emit('connect-agent');

@@ -40,7 +40,7 @@
                     </ul>
                 </main>
                 <footer class="chat-footer">
-                    <textarea class="input-text" placeholder="Digite a mensagem aqui..."></textarea>
+                    <textarea @keydown="sendMessage" class="input-text" placeholder="Digite a mensagem aqui..."></textarea>
                 </footer>
             </div>
         </transition-group>
@@ -69,6 +69,14 @@ export default {
                 const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
                 return v.toString(16);
             });
+        },
+        sendMessage(e) {
+            if (e.code === 'Enter' || e.code === 'NumpadEnter') {
+                e.preventDefault();
+                socket.emit('contactSendMessage', {
+                    message: 'teste do contato'
+                });
+            }
         }
     },
     mounted() {
@@ -85,6 +93,10 @@ export default {
 
         socket.on('contact-list', (data) => {
             console.log(data)
+        });
+
+        socket.on('contactReceiveMessage', (data) => {
+            console.log(data);
         });
     }
 }
