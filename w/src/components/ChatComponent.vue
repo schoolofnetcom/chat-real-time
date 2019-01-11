@@ -18,29 +18,18 @@
                 </header>
                 <main class="chat-content">
                     <ul>
-                        <li class="me">
-                            <p class="name"><img src="/static/boy-avatar.png" class="img" width="40"> Eu</p>
-                            <p class="text">Olá, tudo bem com você?</p>
-                        </li>
-
-                        <li>
-                            <p class="name"><img src="/static/linux-avatar.png" class="img" width="40"> Atendente</p>
-                            <p class="text">Tudo</p>
-                        </li>
-
-                        <li>
-                            <p class="name"><img src="/static/linux-avatar.png" class="img" width="40"> Atendente</p>
-                            <p class="text">E com você?</p>
-                        </li>
-
-                        <li>
-                            <p class="name"><img src="/static/linux-avatar.png" class="img" width="40"> Atendente</p>
-                            <p class="text">Por favor, informe seu nome e email para continuarmos o atendimento</p>
+                        <li v-for="(message, index) in messages" :key="index" :class="{'me': message.me}">
+                            <p class="name">
+                                <img src="/static/boy-avatar.png" class="img" width="40" v-if="message.me">
+                                <img src="/static/linux-avatar.png" class="img" width="40" v-if="!message.me">
+                                {{ message.name }}
+                            </p>
+                            <p class="text">{{ message.text }}</p>
                         </li>
                     </ul>
                 </main>
                 <footer class="chat-footer">
-                    <textarea @keydown="sendMessage" class="input-text" placeholder="Digite a mensagem aqui..."></textarea>
+                    <textarea @keydown="sendMessage" class="input-text" placeholder="Digite a mensagem aqui..." v-model="message"></textarea>
                 </footer>
             </div>
         </transition-group>
@@ -60,7 +49,9 @@ export default {
     },
     data() {
         return {
-            chatShow: false
+            chatShow: false,
+            message: '',
+            messages: []
         }
     },
     methods: {
@@ -73,9 +64,20 @@ export default {
         sendMessage(e) {
             if (e.code === 'Enter' || e.code === 'NumpadEnter') {
                 e.preventDefault();
+
+                const message = {
+                    me: true,
+                    text: this.message,
+                    name: 'Eu'
+                };
+
+                this.messages.push(message)
+
                 socket.emit('contactSendMessage', {
-                    message: 'teste do contato'
+                    message: this.message
                 });
+
+                this.message = '';
             }
         }
     },
@@ -96,7 +98,31 @@ export default {
         });
 
         socket.on('contactReceiveMessage', (data) => {
-            console.log(data);
+            this.chatShow = true;
+            const message = {
+                me: false,
+                text: data.message,
+                name: 'Atendente'
+            };
+
+            this.messages.push(message)
+        });
+
+        socket.on('contactReceiveMessages', (data) => {
+            if (!data) {
+                return;
+            }
+
+            this.chatShow = true;
+            console.log(data)
+
+            data.messages.forEach((item) => {
+                this.messages.push({
+                    me: item.context,
+                    text: item.message,
+                    name: item.context ? 'Eu' : 'Atendente'
+                });
+            })
         });
     }
 }
@@ -122,6 +148,9 @@ $black: #000;
     right: 10px;
     text-align: left;
     font-size: 16px;
+    max-height: 450px;
+    width: 100%;
+    max-width: 300px;
 
     * {
         box-sizing: border-box;
@@ -177,6 +206,7 @@ $black: #000;
     position: relative;
     width: 100%;
     overflow: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column-reverse;
     font-size: .85em;

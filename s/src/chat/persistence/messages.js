@@ -33,7 +33,7 @@ export default class Messages {
 
     getByContactKey(contact) {
         return this.messages.findIndex((item) => {
-            return item.contact_uuid = contact
+            return item.contact_uuid == contact
         });
     }
 }

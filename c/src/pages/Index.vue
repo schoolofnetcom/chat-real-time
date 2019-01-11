@@ -5,7 +5,7 @@
         <q-list link separator style="height: 100%">
           <q-list-header>Leads online</q-list-header>
 
-          <q-item v-for="contact in contacts" :key="contact.uuid">
+          <q-item v-for="(contact, index) in contacts" :key="contact.uuid" @click.native="selected_contact = index">
             <q-item-side icon="contacts"/>
             <q-item-main :label="contact.uuid"/>
             <q-item-side right icon="chat_bubble"/>
@@ -23,19 +23,12 @@
             <q-chat-message label="Sábado, 29 de Dezembro"/>
 
             <q-chat-message
-              name="Lead 1"
-              :text="['Olá, tudo bem com você?']"
-              :sent="false"
-              stamp="4 minutos atrás"
-              avatar="/statics/boy-avatar.png"
-            />
-
-            <q-chat-message
-              name="Atendente"
-              :text="['Tudo', 'E com você?', 'Por favor, informe seu nome e email para continuarmos o atendimento']"
-              :sent="true"
-              stamp="4 minutos atrás"
-              avatar="/statics/linux-avatar.png"
+              :name="message.context ? 'Lead 1' : 'Atendente'"
+              :text="message.message"
+              :sent="message.context"
+              :avatar="message.context ? '/statics/boy-avatar.png' : '/statics/linux-avatar.png'"
+              v-for="(message, index) in current_talk"
+              :key="index"
             />
 
           </q-card-main>
@@ -73,7 +66,39 @@ export default {
     return {
       message: '',
       contacts: [],
-      urls: []
+      urls: [],
+      selected_contact: 0,
+      messages: []
+    }
+  },
+  computed: {
+    current_talk() {
+      const talk = [];
+      let last_added = -1;
+      
+      let messages = this.messages[this.selected_contact];
+
+      if (!messages) {
+        return talk;
+      }
+
+      messages = messages.messages
+
+      messages.forEach((item, i) => {
+        const before = messages[i-1];
+
+        if (!before || before.context != item.context){
+          talk.push({
+            context: item.context,
+            message: [item.message]
+          })
+          last_added ++;
+        } else if (before.context === item.context) {
+          talk[last_added].message.push(item.message)
+        }
+      });
+
+      return talk;
     }
   },
   methods: {
@@ -82,11 +107,13 @@ export default {
         e.preventDefault();
         
         this.$socket.emit('agentSendMessage', {
-          message: 'teste',
+          message: this.message,
           contact: {
-            uuid: this.contacts[0].uuid
+            uuid: this.contacts[this.selected_contact].uuid
           }
         });
+
+        this.message = '';
       }
     }
   },
@@ -101,10 +128,12 @@ export default {
     });
 
     this.$socket.on('agentReceiveMessage', (data) => {
-      console.log(data);
+      this.messages = data;
+      console.log(this.current_talk);
     });
 
     this.$socket.emit('connect-agent');
+
   }
 }
 </script>

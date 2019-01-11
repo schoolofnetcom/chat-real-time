@@ -1,7 +1,4 @@
-import Messages from '../persistence/messages';
-const messages = new Messages;
-
-export default function (contactManager, socket, chat) {
+export default function (contactManager, messages, socket, chat) {
     socket.on('contactSendMessage', function (data) {
         const contact = contactManager.getContact(socket.uuid);
         messages.sendMessage(
@@ -21,11 +18,12 @@ export default function (contactManager, socket, chat) {
         );
 
         const contact = contactManager.getContact(data.contact.uuid);
-        console.log(contact.id)
 
         chat.to(contact.id).emit('contactReceiveMessage', {
             message: data.message,
             context: false
         });
+        
+        chat.to('agents').emit('agentReceiveMessage', messages.messages);
     });
 }

@@ -15,6 +15,8 @@ export default class Contact {
             this.contacts.push(contact);
         } else {
             const url = this.contacts[contactKey].urls[0];
+            this.contacts[contactKey].id = data.id;
+
             if (url !== data.url) {
                 this.contacts[contactKey].urls.splice(0, 0, data.url);
             }
