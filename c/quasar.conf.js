@@ -54,7 +54,9 @@ module.exports = function (ctx) {
         'QCardSeparator',
         'QCardMain',
         'QChatMessage',
-        'QInput'
+        'QInput',
+        'QTable',
+        'QField',
       ],
       directives: [
         'Ripple'

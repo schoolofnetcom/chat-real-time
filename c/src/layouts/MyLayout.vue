@@ -33,7 +33,7 @@
         inset-delimiter
       >
 
-      <q-item to="/">
+      <q-item to="/dashboard">
         <q-item-side icon="chat"></q-item-side>
       </q-item>
 
@@ -70,6 +70,20 @@ export default {
   },
   methods: {
     openURL
+  },
+  mounted() {
+    const token = window.localStorage.getItem('token');
+    if (!token) {
+      this.$router.push('/auth/login');
+    }
+
+    this.$socketUsers.on('auth-failed', () => {
+      this.$router.push('/auth/login');
+    });
+
+    this.$socket.on('auth-failed', () => {
+      this.$router.push('/auth/login');
+    });
   }
 }
 </script>

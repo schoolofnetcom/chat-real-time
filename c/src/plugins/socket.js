@@ -4,4 +4,7 @@ import socketio from 'socket.io-client';
 export default ({ app, router, Vue }) => {
   const socket = socketio('http://localhost/chat');
   Vue.prototype.$socket = socket;
+
+  const socketUsers = socketio('http://localhost/users');
+  Vue.prototype.$socketUsers = socketUsers;
 }

@@ -132,7 +132,7 @@ export default {
       console.log(this.current_talk);
     });
 
-    this.$socket.emit('connect-agent');
+    this.$socket.emit('connect-agent', window.localStorage.getItem('token'));
 
   }
 }

@@ -1,39 +1,56 @@
+import { MessageDB } from '../../../connection';
+
 export default class Messages {
-    constructor() {
-        this.messages = [];
-    }
-
     sendMessage(contact, message_text, is_from_contact) {
-        const message = {
-            context: is_from_contact,
-            message: message_text
-        };
-
-        const message_key = this.getByContactKey(contact);
-
-        if (message_key === -1) {
-            this.messages.push({
-                contact_uuid: contact,
-                messages: [message]
+        return new Promise(async (resolve, reject) => {
+            const message = {
+                context: is_from_contact,
+                message: message_text
+            };
+    
+            let message_db = await this.getByContact(contact);
+    
+            if (!message_db) {
+                message_db = MessageDB({
+                    contact_uuid: contact,
+                    messages: [message]
+                });
+            } else {
+                message_db.messages.push(message);
+            }
+    
+            message_db.save((err) => {
+                if (err) {
+                    reject();
+                    return;
+                }
+                resolve();
             });
-        } else {
-            this.messages[message_key].messages.push(message);
-        }
+        });
+        
     }
 
     getByContact(contact) {
-        const message_key = this.getByContactKey(contact);
-
-        if (message_key === -1) {
-            return null;
-        }
-
-        return this.messages[message_key];
+        return new Promise((resolve, reject) => {
+            MessageDB.findOne({ contact_uuid: contact }, (err, data) => {
+                if (err) {
+                    reject();
+                    return;
+                }
+                resolve(data);
+            });
+        });
     }
 
-    getByContactKey(contact) {
-        return this.messages.findIndex((item) => {
-            return item.contact_uuid == contact
+    getAll() {
+        return new Promise((resolve, reject) => {
+            MessageDB.find({}, (err, data) => {
+                if (err) {
+                    reject();
+                    return;
+                }
+                resolve(data);
+            });
         });
     }
 }
